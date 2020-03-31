@@ -17,7 +17,7 @@ class Covid extends React.Component {
 
         mapboxgl.accessToken = 'pk.eyJ1IjoiamFtYm9ydGFtYXMiLCJhIjoiY2lobWY0ZTgwMDBnNXZrbTk4ZjRwYjA1YyJ9.HM0QHMBmEPzD9vc5KMd4IA'
 
-        const map2 = new mapboxgl.Map({
+        const map = new mapboxgl.Map({
             container: this.mapContainer,
             style: 'mapbox://styles/mapbox/streets-v11',
             center: [19, 47],
@@ -28,22 +28,21 @@ class Covid extends React.Component {
             this.state.data.length != 0 &&
                 this.state.data.map(country => {
 
-                    let cases = `${Math.log(country.stats.confirmed) * 10}px`
-                    let recov = `${Math.log(country.stats.recovered) * 10}px`
-                    let el = document.createElement('div')
-                    let rec = el.appendChild(document.createElement('div'))
+                    const {deaths, confirmed, recovered} = country.stats
+                    const activeCases = confirmed - deaths - recovered
+                    const radius = `${Math.log(activeCases) * 10}px`
                     
-                    rec.appendChild(document.createTextNode(`${country.stats.confirmed} | ${country.stats.recovered}`))
+                    let el = document.createElement('div')
+                    
+                    el.appendChild(document.createTextNode(activeCases))
+                    
                     el.className = 'marker'
-                    rec.className = 'submarker'
-                    el.style.width = cases
-                    el.style.height = cases
-                    rec.style.width = recov
-                    rec.style.height = recov
+                    el.style.width = radius
+                    el.style.height = radius
 
-                    let marker = new mapboxgl.Marker(el)
+                    new mapboxgl.Marker(el)
                         .setLngLat([country.coordinates.longitude, country.coordinates.latitude])
-                        .addTo(map2);
+                        .addTo(map);
 
                 })
         }, 1000)
@@ -55,6 +54,7 @@ class Covid extends React.Component {
 
         return (
             <div>
+                <h1>SARS-Cov-2 active cases</h1>
                 <div className="mapContainer" ref={el => this.mapContainer = el} style={{height: '100vh'}} />
             </div>
         )
